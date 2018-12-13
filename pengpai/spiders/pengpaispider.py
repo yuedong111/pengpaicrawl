@@ -70,8 +70,7 @@ class pengpai(scrapy.spiders.Spider):
     def parse_news(self, response):
         pengpai = PengpaiItem()
         pengpai['url'] = response.url
-        title = response.meta['title']
-        pengpai['title'] = title.strip()
+        title1 = response.meta['title']
         soup = BeautifulSoup(response.body, 'lxml')
         keywords = soup.find('div',{'class': 'news_keyword'})
         if keywords:
@@ -84,6 +83,11 @@ class pengpai(scrapy.spiders.Spider):
         if content:
             new_about = content.find('div', {'class': 'news_about'})
             classfi = content.find('div', {'class': 'news_path'})
+            title = content.find('h1', {'class': 'news_title'})
+            if title:
+                pengpai['title'] = title.text
+            else:
+                pengpai['title'] = ''
             if classfi:
                 ma = classfi.find_all('a')
                 classfication = ma[1].text
@@ -95,11 +99,12 @@ class pengpai(scrapy.spiders.Spider):
         new_txt = soup.find_all('div', {'class': 'news_txt'})
         new_about_txt = ''
         if new_about:
+            temp = ''
             ps = new_about.find_all('p')
             for item in ps:
                 new_about_txt = new_about_txt+" "+item.text.strip()
             for item in new_about_txt.split(' '):
-                temp = ''
+
                 if '-' in item:
                     time = item
                     pengpai['time'] = time
